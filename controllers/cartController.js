@@ -81,31 +81,5 @@ exports.clearUserCart = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
-// exports.updateCartItem = async (req, res) => {
-//     try {
-//         const { cartItemId, quantityChange } = req.body;
-//         const cartItem = await CartItem.findById(cartItemId);
 
-//         if (!cartItem) {
-//             return res.status(404).json({ message: 'Cart item not found', cartItemId: null });
-//         }
-
-//         // Calculate new quantity
-//         const newQuantity = cartItem.quantity + quantityChange;
-
-//         if (newQuantity <= 0) {
-//             // If the new quantity is 0 or less, delete the item
-//             await CartItem.findByIdAndDelete(cartItemId);
-//             res.json({ message: 'Item removed from cart', cartItemId: cartItemId.toString() }); // Ensure cartItemId is returned
-//         } else {
-//             // Otherwise, update the quantity
-//             cartItem.quantity = newQuantity;
-//             await cartItem.save();
-//             console.log(`Item quantity updated in cart, Cart Item ID: ${cartItem._id.toString()}`);
-//             res.json({ message: 'Item quantity updated in cart', cartItemId: cartItem._id.toString() }); // Ensure cartItemId is returned
-//         }
-//     } catch (error) {
-//         console.error("Error updating cart item: ", error);
-//         res.status(400).json({ message: error.message, cartItemId: null });
-//     }
-// };
+  
