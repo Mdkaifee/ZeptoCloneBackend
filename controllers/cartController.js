@@ -89,15 +89,54 @@ exports.getUserCart = async (req, res) => {
 };
 
 
+// exports.removeCartItem = async (req, res) => {
+//   try {
+//     const cartItemId = req.params.cartItemId;
+//     await CartItem.findByIdAndDelete(cartItemId);
+//     res.json({ message: 'Item removed from cart' });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 exports.removeCartItem = async (req, res) => {
   try {
     const cartItemId = req.params.cartItemId;
-    await CartItem.findByIdAndDelete(cartItemId);
-    res.json({ message: 'Item removed from cart' });
+
+    // Find the cart item by ID
+    const cartItem = await CartItem.findById(cartItemId);
+    if (!cartItem) {
+      return res.status(404).json({ message: 'Cart item not found' });
+    }
+
+    // Decrease the quantity by 1, instead of removing it completely
+    if (cartItem.quantity > 1) {
+      // Reduce the quantity by 1
+      cartItem.quantity -= 1;
+      await cartItem.save();
+
+      return res.json({
+        message: 'Item quantity reduced in cart',
+        cartItemId: cartItemId,
+        remainingQuantity: cartItem.quantity,  // Return the remaining quantity
+      });
+    } else {
+      // If the quantity is 1, we will delete the item
+      await CartItem.findByIdAndDelete(cartItemId);
+
+      // Respond with the item removed
+      return res.json({
+        message: 'Item removed from cart',
+        cartItemId: cartItemId,
+        remainingQuantity: 0,  // No more quantity left
+      });
+    }
+
   } catch (error) {
+    console.error("Error in removeCartItem:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.clearUserCart = async (req, res) => {
     try {
       const userId = req.params.userId;  // Assume you'll pass the user ID as a parameter
