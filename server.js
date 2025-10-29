@@ -26,5 +26,8 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', razorpayPaymentRoutes); 
+app.get('/', (req, res) => {
+  res.send('Zepto Clone Backend is running...');
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
