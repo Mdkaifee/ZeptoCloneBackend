@@ -15,6 +15,7 @@ dbConnection(); // Initialize the database connection
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 
+//Routes
 app.get('/', (req, res) => {
   res.send('Zepto backend server is running 🚀');
 });
