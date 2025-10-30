@@ -7,6 +7,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const razorpayPaymentRoutes = require('./routes/razorpayPaymentRoutes');  // Import Razorpay routes
 const orderRoutes = require('./routes/orderRoutes'); // Add this line
 const categoryRoutes = require('./routes/categoryRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 const app = express();
 
 app.use(express.json());
@@ -29,6 +30,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', razorpayPaymentRoutes); 
+app.use('/api/wishlist', wishlistRoutes);
 app.get('/', (req, res) => {
   res.send('Zepto Clone Backend is running...');
 });
