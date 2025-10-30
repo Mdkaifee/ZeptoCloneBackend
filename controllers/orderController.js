@@ -5,20 +5,44 @@ exports.createOrder = async (req, res) => {
   const { userId, cartItems, totalAmount, paymentStatus, orderStatus } = req.body;
 
   try {
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ message: 'Cart items are required to create an order' });
+    }
+
     // Process each cart item and calculate the total
     let cartItemsDetails = [];
     let totalAmountCalculated = 0;
 
     for (let item of cartItems) {
-      const product = await Product.findById(item.product);
-      if (!product) {
-        return res.status(400).json({ message: `Product not found for ID ${item.product}` });
+      const productRef = item?.product;
+      const productId =
+        typeof productRef === 'string'
+          ? productRef
+          : productRef?._id || productRef?.id;
+
+      if (!productId) {
+        return res.status(400).json({ message: 'Invalid product reference in cart item' });
       }
 
-      const itemTotal = product.price * item.quantity;
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(400).json({ message: `Product not found for ID ${productId}` });
+      }
+
+      const quantityRaw = item?.quantity;
+      const quantity =
+        typeof quantityRaw === 'object'
+          ? Number(quantityRaw.value)
+          : Number(quantityRaw);
+
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: `Invalid quantity for product ${productId}` });
+      }
+
+      const itemTotal = product.price * quantity;
       cartItemsDetails.push({
         product: product._id,
-        quantity: item.quantity,
+        quantity,
         totalAmount: itemTotal
       });
 
@@ -100,7 +124,7 @@ exports.getOrdersByUserId = async (req, res) => {
   try {
     const orders = await Order.find({ user: userId }).populate('cartItems.product');  // Populate product details if needed
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found for this user' });
+      return res.status(200).json([]);
     }
 
     res.json(orders);
