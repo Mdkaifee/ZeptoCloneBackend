@@ -43,7 +43,7 @@ exports.createOrder = async (req, res) => {
       cartItemsDetails.push({
         product: product._id,
         quantity,
-        totalAmount: itemTotal
+        productAmount: itemTotal
       });
 
       totalAmountCalculated += itemTotal;
