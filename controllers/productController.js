@@ -39,32 +39,10 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 exports.getAllProducts = async (req, res) => {
-    try {
-      const products = await Product.find({});
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
-  exports.getDistinctCategories = async (req, res) => {
-    try {
-      console.log("Fetching distinct categories...");
-      const categories = await Product.distinct("categories");
-      console.log("Categories found:", categories);
-      res.json(categories);
-    } catch (error) {
-      console.error("Error in getDistinctCategories:", error);
-      res.status(500).json({ message: error.message });
-    }
-  };
-  
-  
-exports.getProductsByCategory = async (req, res) => {
-    try {
-      const products = await Product.find({ categories: req.params.category });
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };  
-  
+  try {
+    const products = await Product.find({});
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
