@@ -5,7 +5,7 @@ const defaultContent = {
     title: 'Privacy Policy',
     body: `Last updated: ${new Date().toISOString().split('T')[0]}
 
-Zepto grocery ("we", "our", "us") values your privacy. This policy explains what data we collect, why we collect it, and how you can manage your information when using our grocery marketplace and related services.
+Quick Basket grocery ("we", "our", "us") values your privacy. This policy explains what data we collect, why we collect it, and how you can manage your information when using our grocery marketplace and related services.
 
 1. Information We Collect
 - Account details such as name, email address, mobile number, and delivery addresses.
@@ -31,7 +31,7 @@ Zepto grocery ("we", "our", "us") values your privacy. This policy explains what
 5. Your Controls
 - Update profile details in the app or request changes via support.
 - Opt out of marketing messages through in-app settings or unsubscribe links.
-- Request access to, portability of, or deletion of your data by contacting privacy@zeptogrocery.com.
+- Request access to, portability of, or deletion of your data by contacting privacy@quickbasket.com.
 
 6. Security
 - Industry-standard encryption in transit and at rest.
@@ -44,14 +44,14 @@ Zepto grocery ("we", "our", "us") values your privacy. This policy explains what
 - We will notify you of significant updates via email or in-app notification. Continued use constitutes acceptance of the revised policy.
 
 9. Contact
-- privacy@zeptogrocery.com
-- Zepto grocery Data Protection, 42 Market Street, Bengaluru, India`
+- privacy@quickbasket.com
+- Quick Basket Data Protection, 42 Market Street, Bengaluru, India`
   },
   terms_and_conditions: {
     title: 'Terms & Conditions',
     body: `Last updated: ${new Date().toISOString().split('T')[0]}
 
-Welcome to Zepto grocery. By creating an account, placing orders, or otherwise using our grocery marketplace ("Services"), you agree to these Terms & Conditions. Please read them carefully.
+Welcome to Quick Basket. By creating an account, placing orders, or otherwise using our grocery marketplace ("Services"), you agree to these Terms & Conditions. Please read them carefully.
 
 1. Eligibility
 - You must be at least 18 years old and capable of entering a binding contract.
@@ -79,7 +79,7 @@ Welcome to Zepto grocery. By creating an account, placing orders, or otherwise u
 - Automated scraping, data harvesting, or resale of products without consent is prohibited.
 
 7. Intellectual Property
-- All content, trademarks, and software used in the Services belong to Zepto grocery or its licensors.
+- All content, trademarks, and software used in the Services belong to Quick Basket or its licensors.
 - You may not copy, modify, or distribute our content without prior written permission.
 
 8. Account Suspension or Termination
@@ -87,7 +87,7 @@ Welcome to Zepto grocery. By creating an account, placing orders, or otherwise u
 - You may close your account at any time. Outstanding obligations (payments, disputes) survive termination.
 
 9. Limitation of Liability
-- To the maximum extent permitted by law, Zepto grocery is not liable for indirect, incidental, or consequential damages arising from your use of the Services.
+- To the maximum extent permitted by law, Quick Basket is not liable for indirect, incidental, or consequential damages arising from your use of the Services.
 - Our aggregate liability is limited to the amount you paid for the relevant order.
 
 10. Governing Law & Dispute Resolution
@@ -97,8 +97,8 @@ Welcome to Zepto grocery. By creating an account, placing orders, or otherwise u
 - We may update these terms periodically. Continued use after notice of changes indicates acceptance.
 
 12. Contact
-- support@zeptogrocery.com
-- Zepto grocery Customer Care, 42 Market Street, Bengaluru, India`
+- support@quickbasket.com
+- Quick Basket Customer Care, 42 Market Street, Bengaluru, India`
   }
 };
 

@@ -1,14 +1,13 @@
 const express = require('express');
 const {
   getCategories,
-  getProductsForCategory,
+  createCategory,
 } = require('../controllers/categoryController');
 
 const router = express.Router();
 
 router.get('/', getCategories);
-router.get('/products', getProductsForCategory); // supports ?category=Electronics
-router.get('/:category/products', getProductsForCategory);
+router.post('/', createCategory);
 
 module.exports = router;
 

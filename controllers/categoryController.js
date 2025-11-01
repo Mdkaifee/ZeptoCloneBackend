@@ -1,63 +1,56 @@
-const Product = require('../models/Product');
-
-const normaliseCategoryInput = (value) => {
-  if (!value) return [];
-
-  if (Array.isArray(value)) {
-    return value
-      .map((category) => (typeof category === 'string' ? category.trim() : ''))
-      .filter(Boolean);
-  }
-
-  if (typeof value !== 'string') return [];
-
-  return value
-    .split(',')
-    .map((category) => category.trim())
-    .filter(Boolean);
-};
+const Category = require('../models/Category');
+const MainCategory = require('../models/MainCategory');
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Product.aggregate([
-      { $unwind: '$categories' },
-      {
-        $group: {
-          _id: { $toLower: '$categories' },
-          label: { $first: '$categories' },
-          productCount: { $sum: 1 },
-        },
-      },
-      { $sort: { label: 1 } },
-    ]);
+    const { mainCategoryId } = req.query;
+    const filter = {};
 
-    res.json(
-      categories.map((category) => ({
-        name: category.label,
-        productCount: category.productCount,
-      })),
-    );
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getProductsForCategory = async (req, res) => {
-  try {
-    const rawCategory = req.params.category ?? req.query.category;
-    const categoriesToMatch = normaliseCategoryInput(rawCategory);
-
-    if (!categoriesToMatch.length) {
-      return res.status(400).json({ message: 'Category is required' });
+    if (mainCategoryId) {
+      filter.mainCategory = mainCategoryId;
     }
 
-    const products = await Product.find({
-      categories: { $in: categoriesToMatch },
-    });
+    const categories = await Category.find(filter)
+      .populate('mainCategory', 'name imageUrl')
+      .select('name description imageUrl mainCategory')
+      .sort({ name: 1 })
+      .lean();
 
-    res.json(products);
+    res.json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+exports.createCategory = async (req, res) => {
+  try {
+    const { name, description, imageUrl, mainCategoryId } = req.body;
+
+    if (!name || !mainCategoryId) {
+      return res
+        .status(400)
+        .json({ message: 'Name and mainCategoryId are required' });
+    }
+
+    const parent = await MainCategory.findById(mainCategoryId);
+    if (!parent) {
+      return res.status(404).json({ message: 'Main category not found' });
+    }
+
+    const category = await Category.create({
+      name: name.trim(),
+      description,
+      imageUrl,
+      mainCategory: mainCategoryId,
+    });
+
+    res.status(201).json(category);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: 'Category already exists for this main category' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+};

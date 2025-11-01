@@ -1,30 +1,64 @@
 const mongoose = require('mongoose');
+const { buildImageUrl } = require('../utils/staticImage');
 
-const productSchema = new mongoose.Schema({
-  categories: { type: [String], required: true },
-  name: { type: String, required: true },
-  quantity: {
-    value: { type: Number, required: true },
-    unit: { type: String, enum: ['kg', 'g', 'ltr', 'ml', 'pcs', 'lb', 'unit'], default: 'unit' }
-  },
-  price: { type: Number, required: true },
-  returnAllowed: { type: Boolean, required: true },
-  image: { type: String },
-  description: { type: String },
-  sellerName: { type: String },
-  sellerAddress: { type: String },
-  countryOfOrigin: { type: String },
-  shelfLife: { type: String },
+const UNIT_ENUM = ['g', 'gm', 'kg', 'ml', 'l', 'ltr', 'pcs', 'pack', 'unit'];
 
-  // 👇 New CPU or general technical specs section
-  technicalDetails: {
-    cpu: { type: String },
-    ram: { type: String },
-    storage: { type: String },
-    gpu: { type: String },
-    os: { type: String }
+const productSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    imageUrl: {
+      type: String,
+      default: function defaultImage() {
+        return buildImageUrl('products', this._id || this.name);
+      },
+    },
+    mainCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'MainCategory',
+      required: true,
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    },
+    subcategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subcategory',
+      required: true,
+    },
+    quantity: {
+      value: { type: Number, required: true, min: 0 },
+      unit: {
+        type: String,
+        enum: UNIT_ENUM,
+        default: 'unit',
+      },
+    },
+    price: { type: Number, required: true, min: 0 },
+    returnAllowed: { type: Boolean, default: false },
+    description: { type: String, default: '' },
+    shelfLife: { type: String, default: '' },
+    countryOfOrigin: { type: String, default: 'India' },
+    sellerName: { type: String, default: '' },
+    sellerAddress: { type: String, default: '' },
+    specifications: {
+      cpu: { type: String },
+      ram: { type: String },
+      storage: { type: String },
+      gpu: { type: String },
+      os: { type: String },
+      additional: {
+        type: Map,
+        of: String,
+        default: undefined,
+      },
+    },
   },
-});
+  { timestamps: true },
+);
+
+productSchema.index({ name: 1, subcategory: 1 }, { unique: true });
 
 const Product = mongoose.model('Product', productSchema);
 

@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: ZeptoClone Backend API
+  title: Quick Basket APIs
   version: 1.0.0
-  description: REST API documentation for the ZeptoClone backend.
+  description: REST API documentation for the Quick Basket backend.
 servers:
   - url: http://localhost:5000
 paths:
@@ -18,7 +18,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: Zepto Clone Backend is running...
+                example: Quick Basket Backend is running...
   /api/auth/signup:
     post:
       tags:
@@ -143,7 +143,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ProductCreateRequest'
       responses:
         '201':
           description: Product created
@@ -156,7 +156,23 @@ paths:
     get:
       tags:
         - Products
-      summary: List all products
+      summary: List products with optional filters
+      parameters:
+        - in: query
+          name: mainCategoryId
+          schema:
+            type: string
+          description: Filter by main category id
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+          description: Filter by category id
+        - in: query
+          name: subcategoryId
+          schema:
+            type: string
+          description: Filter by subcategory id
       responses:
         '200':
           description: Product list
@@ -228,68 +244,133 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /api/main-categories:
+    get:
+      tags:
+        - Categories
+      summary: List main categories
+      responses:
+        '200':
+          description: Main categories with images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MainCategory'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+        - Categories
+      summary: Create a main category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MainCategoryCreateRequest'
+      responses:
+        '201':
+          description: Main category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MainCategory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/categories:
     get:
       tags:
         - Categories
-      summary: List distinct categories
-      responses:
-        '200':
-          description: Category list
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CategorySummary'
-        '500':
-          $ref: '#/components/responses/InternalError'
-  /api/categories/products:
-    get:
-      tags:
-        - Categories
-      summary: List products for category query
+      summary: List categories (optionally filtered by main category)
       parameters:
         - in: query
-          name: category
+          name: mainCategoryId
           schema:
             type: string
-          description: Category name or comma-separated list
+          description: Identifier of the parent main category
       responses:
         '200':
-          description: Products in category
+          description: Categories with image metadata
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                  $ref: '#/components/schemas/Category'
         '500':
           $ref: '#/components/responses/InternalError'
-  /api/categories/{category}/products:
+    post:
+      tags:
+        - Categories
+      summary: Create a category under a main category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/subcategories:
     get:
       tags:
         - Categories
-      summary: List products for a specific category
+      summary: List subcategories (optionally filtered by category)
       parameters:
-        - name: category
-          in: path
-          required: true
+        - in: query
+          name: categoryId
           schema:
             type: string
+          description: Identifier of the parent category
       responses:
         '200':
-          description: Products in category
+          description: Subcategories with category metadata
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: '#/components/schemas/Subcategory'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+        - Categories
+      summary: Create a subcategory under a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubcategoryCreateRequest'
+      responses:
+        '201':
+          description: Subcategory created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subcategory'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalError'
   /api/cart/add:
@@ -923,20 +1004,12 @@ components:
               nullable: true
     Product:
       type: object
-      required:
-        - categories
-        - name
-        - quantity
-        - price
-        - returnAllowed
       properties:
         _id:
           type: string
-        categories:
-          type: array
-          items:
-            type: string
         name:
+          type: string
+        imageUrl:
           type: string
         quantity:
           $ref: '#/components/schemas/ProductQuantity'
@@ -944,36 +1017,95 @@ components:
           type: number
         returnAllowed:
           type: boolean
-        image:
-          type: string
         description:
+          type: string
+        shelfLife:
+          type: string
+        countryOfOrigin:
           type: string
         sellerName:
           type: string
         sellerAddress:
           type: string
-        countryOfOrigin:
+        specifications:
+          $ref: '#/components/schemas/ProductSpecifications'
+        mainCategory:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/MainCategory'
+        category:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Category'
+        subcategory:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Subcategory'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProductCreateRequest:
+      type: object
+      required:
+        - name
+        - quantity
+        - price
+        - returnAllowed
+        - subcategoryId
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+        mainCategoryId:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        quantity:
+          $ref: '#/components/schemas/ProductQuantity'
+        price:
+          type: number
+        returnAllowed:
+          type: boolean
+        description:
           type: string
         shelfLife:
           type: string
-        technicalDetails:
-          $ref: '#/components/schemas/ProductTechnicalDetails'
+        countryOfOrigin:
+          type: string
+          default: India
+        sellerName:
+          type: string
+        sellerAddress:
+          type: string
+        specifications:
+          $ref: '#/components/schemas/ProductSpecifications'
     ProductQuantity:
       type: object
+      required:
+        - value
+        - unit
       properties:
         value:
           type: number
         unit:
           type: string
           enum:
-            - kg
             - g
-            - ltr
+            - gm
+            - kg
             - ml
+            - l
+            - ltr
             - pcs
-            - lb
+            - pack
             - unit
-    ProductTechnicalDetails:
+    ProductSpecifications:
       type: object
       properties:
         cpu:
@@ -986,13 +1118,90 @@ components:
           type: string
         os:
           type: string
-    CategorySummary:
+        additional:
+          type: object
+          additionalProperties:
+            type: string
+    MainCategory:
       type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+    MainCategoryCreateRequest:
+      type: object
+      required:
+        - name
       properties:
         name:
           type: string
-        productCount:
-          type: integer
+        description:
+          type: string
+        imageUrl:
+          type: string
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        mainCategory:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/MainCategory'
+    CategoryCreateRequest:
+      type: object
+      required:
+        - name
+        - mainCategoryId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        mainCategoryId:
+          type: string
+    Subcategory:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Category'
+    SubcategoryCreateRequest:
+      type: object
+      required:
+        - name
+        - categoryId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        categoryId:
+          type: string
     CartAddRequest:
       type: object
       required:

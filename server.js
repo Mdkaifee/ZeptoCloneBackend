@@ -10,6 +10,8 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const razorpayPaymentRoutes = require('./routes/razorpayPaymentRoutes');  // Import Razorpay routes
 const orderRoutes = require('./routes/orderRoutes'); // Add this line
 const categoryRoutes = require('./routes/categoryRoutes');
+const mainCategoryRoutes = require('./routes/mainCategoryRoutes');
+const subcategoryRoutes = require('./routes/subcategoryRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const addressRoutes = require('./routes/addressRoutes');
@@ -26,13 +28,15 @@ const userRoutes = require('./routes/userRoutes');
 
 //Routes
 app.get('/', (req, res) => {
-  res.send('Zepto backend server is running 🚀');
+  res.send('Quick Basket backend server is running 🚀');
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/main-categories', mainCategoryRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/subcategories', subcategoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
@@ -41,7 +45,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/addresses', addressRoutes);
 app.get('/', (req, res) => {
-  res.send('Zepto Clone Backend is running...');
+  res.send('Quick Basket Backend is running...');
 });
 const PORT = process.env.PORT || 5000;
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
