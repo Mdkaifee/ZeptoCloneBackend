@@ -1,5 +1,8 @@
 const express = require('express');
+const path = require('path');
 require('dotenv').config();
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 const dbConnection = require('./config/db');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
@@ -10,9 +13,11 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yml'));
 const app = express();
 
 app.use(express.json());
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 dbConnection(); // Initialize the database connection
 

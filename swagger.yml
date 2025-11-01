@@ -1,0 +1,1406 @@
+openapi: 3.0.3
+info:
+  title: ZeptoClone Backend API
+  version: 1.0.0
+  description: REST API documentation for the ZeptoClone backend.
+servers:
+  - url: http://localhost:5000
+paths:
+  /:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      responses:
+        '200':
+          description: Server is running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Zepto Clone Backend is running...
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthSignupRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: User registered successfully
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate a user and return JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout the current user
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: User logged out successfully
+  /api/user/edit/{id}:
+    patch:
+      tags:
+        - Users
+      summary: Update profile fields for a user
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEditResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/user/soft-delete/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Soft delete a user account
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Account marked as deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSoftDeleteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/products:
+    post:
+      tags:
+        - Products
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags:
+        - Products
+      summary: List all products
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get a product by ID
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Products
+      summary: Update a product
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    delete:
+      tags:
+        - Products
+      summary: Delete a product
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/categories:
+    get:
+      tags:
+        - Categories
+      summary: List distinct categories
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategorySummary'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/categories/products:
+    get:
+      tags:
+        - Categories
+      summary: List products for category query
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Category name or comma-separated list
+      responses:
+        '200':
+          description: Products in category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/categories/{category}/products:
+    get:
+      tags:
+        - Categories
+      summary: List products for a specific category
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Products in category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/cart/add:
+    post:
+      tags:
+        - Cart
+      summary: Add or increment an item in cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartAddRequest'
+      responses:
+        '200':
+          description: Quantity updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '201':
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/cart/update:
+    put:
+      tags:
+        - Cart
+      summary: Change quantity for a cart item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartUpdateRequest'
+      responses:
+        '200':
+          description: Quantity updated or item removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/cart/user/{userId}:
+    get:
+      tags:
+        - Cart
+      summary: Get cart for a user
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Cart items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItemPopulated'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/cart/remove/{cartItemId}:
+    delete:
+      tags:
+        - Cart
+      summary: Decrement or remove a cart item
+      parameters:
+        - $ref: '#/components/parameters/CartItemIdParam'
+      responses:
+        '200':
+          description: Item updated or removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartRemoveResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/cart/clear/{userId}:
+    delete:
+      tags:
+        - Cart
+      summary: Remove all items from a cart
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Cart cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cart cleared successfully
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/payment/create-payment-intent:
+    post:
+      tags:
+        - Payments
+      summary: Create Stripe payment intent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentIntentRequest'
+      responses:
+        '200':
+          description: Client secret for Stripe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/payment/create-order:
+    post:
+      tags:
+        - Payments
+      summary: Create Razorpay order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RazorpayOrderRequest'
+      responses:
+        '200':
+          description: Razorpay order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RazorpayOrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/orders:
+    post:
+      tags:
+        - Orders
+      summary: Create an order from cart items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Fetch order by ID
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderPopulated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/orders/payment:
+    put:
+      tags:
+        - Orders
+      summary: Update payment status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPaymentUpdateRequest'
+      responses:
+        '200':
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/orders/status:
+    put:
+      tags:
+        - Orders
+      summary: Update order status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdateRequest'
+      responses:
+        '200':
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/orders/user/{userId}:
+    get:
+      tags:
+        - Orders
+      summary: List orders by user
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Orders for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderPopulated'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/wishlist/{userId}:
+    get:
+      tags:
+        - Wishlist
+      summary: Get wishlist for user
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Wishlist items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/wishlist:
+    post:
+      tags:
+        - Wishlist
+      summary: Add item to wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistAddRequest'
+      responses:
+        '201':
+          description: Added to wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistMutationResponse'
+        '200':
+          description: Already present
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/wishlist/{userId}/{productId}:
+    delete:
+      tags:
+        - Wishlist
+      summary: Remove product from wishlist
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/ProductRefParam'
+      responses:
+        '200':
+          description: Removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/content/privacy-policy:
+    get:
+      tags:
+        - Content
+      summary: Fetch privacy policy
+      responses:
+        '200':
+          description: Privacy policy document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Content
+      summary: Update privacy policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentUpdateRequest'
+      responses:
+        '200':
+          description: Update result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/content/terms-and-conditions:
+    get:
+      tags:
+        - Content
+      summary: Fetch terms and conditions
+      responses:
+        '200':
+          description: Terms and conditions document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Content
+      summary: Update terms and conditions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentUpdateRequest'
+      responses:
+        '200':
+          description: Update result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/addresses/{userId}:
+    get:
+      tags:
+        - Addresses
+      summary: List saved addresses for user
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Address list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/addresses:
+    post:
+      tags:
+        - Addresses
+      summary: Add an address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressCreateRequest'
+      responses:
+        '201':
+          description: Address created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/addresses/{userId}/{addressId}:
+    patch:
+      tags:
+        - Addresses
+      summary: Update an address
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/AddressIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressUpdateRequest'
+      responses:
+        '200':
+          description: Address updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  parameters:
+    AccountIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the user
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the user
+    ProductIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the product
+    ProductRefParam:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the product
+    CartItemIdParam:
+      name: cartItemId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the cart item
+    OrderIdParam:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the order
+    AddressIdParam:
+      name: addressId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the embedded address
+  responses:
+    BadRequest:
+      description: Invalid input supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+  schemas:
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+    AuthSignupRequest:
+      type: object
+      required:
+        - name
+        - email
+        - mobile
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+        password:
+          type: string
+          format: password
+    AuthLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthLoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+            mobile:
+              type: string
+    UserEditRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+    UserEditResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Profile updated successfully
+        updatedUser:
+          $ref: '#/components/schemas/User'
+    UserSoftDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          type: object
+          properties:
+            _id:
+              type: string
+            isDeleted:
+              type: boolean
+            deletedAt:
+              type: string
+              format: date-time
+              nullable: true
+    Product:
+      type: object
+      required:
+        - categories
+        - name
+        - quantity
+        - price
+        - returnAllowed
+      properties:
+        _id:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+        quantity:
+          $ref: '#/components/schemas/ProductQuantity'
+        price:
+          type: number
+        returnAllowed:
+          type: boolean
+        image:
+          type: string
+        description:
+          type: string
+        sellerName:
+          type: string
+        sellerAddress:
+          type: string
+        countryOfOrigin:
+          type: string
+        shelfLife:
+          type: string
+        technicalDetails:
+          $ref: '#/components/schemas/ProductTechnicalDetails'
+    ProductQuantity:
+      type: object
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          enum:
+            - kg
+            - g
+            - ltr
+            - ml
+            - pcs
+            - lb
+            - unit
+    ProductTechnicalDetails:
+      type: object
+      properties:
+        cpu:
+          type: string
+        ram:
+          type: string
+        storage:
+          type: string
+        gpu:
+          type: string
+        os:
+          type: string
+    CategorySummary:
+      type: object
+      properties:
+        name:
+          type: string
+        productCount:
+          type: integer
+    CartAddRequest:
+      type: object
+      required:
+        - userId
+        - productId
+        - quantity
+      properties:
+        userId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+    CartUpdateRequest:
+      type: object
+      required:
+        - cartItemId
+        - quantityChange
+      properties:
+        cartItemId:
+          type: string
+        quantityChange:
+          type: integer
+    CartMutationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        cartItemId:
+          type: string
+    CartItem:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        product:
+          type: string
+        quantity:
+          type: integer
+    CartItemPopulated:
+      allOf:
+        - $ref: '#/components/schemas/CartItem'
+        - type: object
+          properties:
+            product:
+              $ref: '#/components/schemas/Product'
+    CartRemoveResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        cartItemId:
+          type: string
+        remainingQuantity:
+          type: integer
+    PaymentIntentRequest:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: integer
+        currency:
+          type: string
+          example: INR
+    PaymentIntentResponse:
+      type: object
+      properties:
+        clientSecret:
+          type: string
+    RazorpayOrderRequest:
+      type: object
+      required:
+        - amount
+        - userId
+      properties:
+        amount:
+          type: integer
+        userId:
+          type: string
+    RazorpayOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        currency:
+          type: string
+          example: INR
+    OrderCreateRequest:
+      type: object
+      required:
+        - userId
+        - cartItems
+      properties:
+        userId:
+          type: string
+        cartItems:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                oneOf:
+                  - type: string
+                  - $ref: '#/components/schemas/Product'
+              quantity:
+                oneOf:
+                  - type: number
+                  - type: object
+                    properties:
+                      value:
+                        type: number
+        totalAmount:
+          type: number
+        paymentStatus:
+          type: string
+          enum:
+            - Paid
+            - Pending
+            - COD
+        orderStatus:
+          type: string
+          enum:
+            - Ordered
+            - Cancelled
+            - Delivered
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        cartItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderCartItem'
+        totalAmount:
+          type: number
+        paymentStatus:
+          type: string
+        orderStatus:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    OrderCartItem:
+      type: object
+      properties:
+        product:
+          type: string
+        quantity:
+          type: number
+        productAmount:
+          type: number
+    OrderPopulated:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            cartItems:
+              type: array
+              items:
+                type: object
+                properties:
+                  product:
+                    $ref: '#/components/schemas/Product'
+                  quantity:
+                    type: number
+                  productAmount:
+                    type: number
+    OrderPaymentUpdateRequest:
+      type: object
+      required:
+        - orderId
+        - paymentStatus
+      properties:
+        orderId:
+          type: string
+        paymentStatus:
+          type: string
+          enum:
+            - Paid
+            - Pending
+            - COD
+    OrderStatusUpdateRequest:
+      type: object
+      required:
+        - orderId
+        - orderStatus
+      properties:
+        orderId:
+          type: string
+        orderStatus:
+          type: string
+          enum:
+            - Ordered
+            - Cancelled
+            - Delivered
+    WishlistAddRequest:
+      type: object
+      required:
+        - userId
+        - productId
+      properties:
+        userId:
+          type: string
+        productId:
+          type: string
+    WishlistMutationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        wishlist:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    Content:
+      type: object
+      properties:
+        _id:
+          type: string
+        key:
+          type: string
+          enum:
+            - privacy_policy
+            - terms_and_conditions
+        title:
+          type: string
+        body:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    ContentUpdateRequest:
+      type: object
+      required:
+        - body
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+    ContentUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        content:
+          $ref: '#/components/schemas/Content'
+    Address:
+      type: object
+      properties:
+        _id:
+          type: string
+        buildingName:
+          type: string
+        area:
+          type: string
+        landmark:
+          type: string
+          nullable: true
+        city:
+          type: string
+        pincode:
+          type: string
+        state:
+          type: string
+        label:
+          type: string
+        receiverName:
+          type: string
+        phone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    AddressCreateRequest:
+      type: object
+      required:
+        - userId
+        - buildingName
+        - area
+        - city
+        - pincode
+        - state
+        - label
+      properties:
+        userId:
+          type: string
+        buildingName:
+          type: string
+        area:
+          type: string
+        landmark:
+          type: string
+          nullable: true
+        city:
+          type: string
+        pincode:
+          type: string
+        state:
+          type: string
+        label:
+          type: string
+        receiverName:
+          type: string
+        phone:
+          type: string
+    AddressCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+    AddressUpdateRequest:
+      type: object
+      properties:
+        buildingName:
+          type: string
+        area:
+          type: string
+        landmark:
+          type: string
+          nullable: true
+        city:
+          type: string
+        pincode:
+          type: string
+        state:
+          type: string
+        label:
+          type: string
+        receiverName:
+          type: string
+        phone:
+          type: string
+    AddressUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+    AddressDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        mobile:
+          type: string
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        wishlist:
+          type: array
+          items:
+            type: string
+        isDeleted:
+          type: boolean
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deleteReason:
+          type: string
+          nullable: true
+    delete:
+      tags:
+        - Addresses
+      summary: Delete an address
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/AddressIdParam'
+      responses:
+        '200':
+          description: Address deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDeleteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
