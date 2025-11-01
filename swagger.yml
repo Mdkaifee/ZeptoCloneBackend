@@ -1013,12 +1013,15 @@ components:
           type: string
         quantity:
           $ref: '#/components/schemas/ProductQuantity'
-        price:
-          type: number
-        returnAllowed:
-          type: boolean
-        description:
-          type: string
+    price:
+      type: number
+    returnAllowed:
+      type: boolean
+    stock:
+      type: integer
+      minimum: 0
+    description:
+      type: string
         shelfLife:
           type: string
         countryOfOrigin:
@@ -1070,6 +1073,9 @@ components:
           $ref: '#/components/schemas/ProductQuantity'
         price:
           type: number
+        stock:
+          type: integer
+          minimum: 0
         returnAllowed:
           type: boolean
         description:

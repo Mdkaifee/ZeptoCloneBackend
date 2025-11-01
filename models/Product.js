@@ -36,6 +36,7 @@ const productSchema = new mongoose.Schema(
       },
     },
     price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, default: 0, min: 0 },
     returnAllowed: { type: Boolean, default: false },
     description: { type: String, default: '' },
     shelfLife: { type: String, default: '' },
