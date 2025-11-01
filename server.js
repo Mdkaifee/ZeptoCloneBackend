@@ -15,6 +15,7 @@ const subcategoryRoutes = require('./routes/subcategoryRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yml'));
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/payment', razorpayPaymentRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.get('/', (req, res) => {
   res.send('Quick Basket Backend is running...');
 });
